@@ -42,7 +42,7 @@ properties.load(new FileInputStream("config.properties"));
 ```
 String url = "https://api.nasa.gov/planetary/apod?api_key=" + apiKey;
 ```
-**3. Создаем файл `config.properties` для хранения ключа который Nasa отправила почту и записываем туда ключ. Не забыв добавить файл `config.properties` в `gitignore`**
+**3. Создаем файл `config.properties` для хранения ключа который Nasa отправила на почту и записываем туда ключ. Не забыв добавить файл `config.properties` в `gitignore`**
 ```
 api_key=ключ полученный на почту
 ```
@@ -144,7 +144,7 @@ String imageUrl = answer.url;
 ```
 HttpGet imageRequest = new HttpGet(imageUrl);
 ```
-*Создаем массив который методом `split` разбивает по слешу /.
+* Создаем массив который методом `split` разбивает по слешу /.
 ```
 String[] urlSplitted = imageUrl.split("/");
 ```
