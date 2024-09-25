@@ -24,7 +24,12 @@
         </dependency>
      </dependencies>
 ```
-**2. В папке java пишем код программы.**
+
+**2. Создаем файл `config.properties` для хранения ключа который Nasa отправила на почту и записываем туда ключ. Не забыв добавить файл `config.properties` в `gitignore`**
+```
+api_key=ключ полученный на почту
+```
+**3. В папке java пишем код программы.**
 * Создаем класс `Main.java`.
 * Метод с которого начинает работать любая программа.
 ```
@@ -41,10 +46,6 @@ properties.load(new FileInputStream("config.properties"));
 * Извлекаем значение параметра "api_key" из загруженных свойств и сохраняем его в переменную apiKey. Если ключа нет, то apiKey будет равно null.
 ```
 String url = "https://api.nasa.gov/planetary/apod?api_key=" + apiKey;
-```
-**3. Создаем файл `config.properties` для хранения ключа который Nasa отправила на почту и записываем туда ключ. Не забыв добавить файл `config.properties` в `gitignore`**
-```
-api_key=ключ полученный на почту
 ```
 * Создаем экземпляр HTTP-клиента, который будет использоваться для выполнения HTTP-запросов. Этот клиент автоматически управляет соединениями (см. документацию библиотеки [Apache HttpClient](https://hc.apache.org/httpcomponents-client-4.5.x/quickstart.html)).
 ```
