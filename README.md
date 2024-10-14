@@ -15,7 +15,7 @@
 
 ### Реализация
 **1. Создаем проект `maven` и добавляем в pom.xml библиотеку [Apache HttpClient](https://mvnrepository.com/search?q=Apache+HttpClient) внутри тега `<dependencies>`.**
-```
+```java
       <dependencies>
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
@@ -32,49 +32,49 @@ api_key=ключ полученный на почту
 **3. В папке java пишем код программы.**
 * Создаем класс `Main.java`.
 * Метод с которого начинает работать любая программа.
-```
+```java
 public static void main(String[] args) {
 ```
 * Создаем новый объект Properties, который будет использоваться для хранения пар "ключ-значение" из файла конфигурации.
-```
+```java
 Properties properties = new Properties();
 ```
 * Загружаем данные из файла 'config.properties'. Этот файл должен находиться в корневом каталоге проекта или указан путь к нему. Это может привести к IOException, если файла не существует.
-```
+```java
 properties.load(new FileInputStream("config.properties"));
 ```
 * Извлекаем значение параметра "api_key" из загруженных свойств и сохраняем его в переменную apiKey. Если ключа нет, то apiKey будет равно null.
-```
+```java
 String url = "https://api.nasa.gov/planetary/apod?api_key=" + apiKey;
 ```
 * Создаем экземпляр HTTP-клиента, который будет использоваться для выполнения HTTP-запросов. Этот клиент автоматически управляет соединениями (см. документацию библиотеки [Apache HttpClient](https://hc.apache.org/httpcomponents-client-4.5.x/quickstart.html)).
-```
+```java
 CloseableHttpClient httpclient = HttpClients.createDefault();
 ``` 
 * Составляем  GET запрос в который передан адрес по которому нужно послать информацию за конкретную дату.
-```
+```java
 HttpGet request = new HttpGet(url + "&date=2024-09-05");
 ```
 * Посылаем запрос методом execute с сохранением ответа в переменную и добавляем исключения в сигнатуру метода который предложила IDEA `throws IOException` (При возникновении ошибки ввода, вывода эта ошибка будет скинута на операционную систему).
-```
+```java
 CloseableHttpResponse response = httpclient.execute(request);
 ```
 * Для того чтобы прочесть ответ добавляем сущность способную принимать поток входящих данных в программу.
-```
+```java
 Scanner sc = new Scanner(response.getEntity().getContent());
 ```
 * Выводим на экран что лежит в этом сканере.
-```
+```java
 System.out.println(sc.nextLine());
 ```
 **4. Запускаем программу, получаем строку ответа.**
 * После получения строки ответа можно закоментировать часть кода, которая в дальнейшем будет мешать отрабатывать ему (Ответ сервера можно прочитать один раз либо Scanner либо ObjectMapper, который будет применяться в дальнейшем).
-```
+```java
 //        Scanner sc = new Scanner(response.getEntity().getContent());
 //        System.out.println(sc.nextLine());
 ```
 **5. Создаем отдельный json файл `answer.json` в который помещаем скопированную строку ответа из консоли (ключ-значение).**
-```
+```json
 {
   "copyright": "Eric Benson",
   "date": "2024-09-05",
@@ -89,7 +89,7 @@ System.out.println(sc.nextLine());
 **6. Переводим формат json в формат который java будет понимать.**
 * Cоздаем класс `NasaAnswer.java` в папке java, который будет полностью соответствовать формату `answer.json` файла.
 * Заводим поля моего класса.
-```
+```java
 public class NasaAnswer {
     String date;
     String explanation;
@@ -101,7 +101,7 @@ public class NasaAnswer {
     String copyright;
 ```
 **7. В pom.xml добавляем библиотеку [Jackson Databind](https://mvnrepository.com/search?q=Jackson+Databind).**
- ```
+ ```java
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -109,7 +109,7 @@ public class NasaAnswer {
         </dependency>
 ```
 **8. Для того, чтобы связывать класс `NasaAnswer` c json форматом, генерируем конструктор со специальными особенностями.**
-```
+```java
  public NasaAnswer(@JsonProperty("date") String date,
                       @JsonProperty("explanation") String explanation,
                       @JsonProperty("hdurl") String hdurl,
@@ -130,39 +130,39 @@ public class NasaAnswer {
 ```
 **9. Для того чтобы преобразовывать ответ сервера в объект класса `NasaAnswer`.**
 * В классе Main cоздаем объект ObjectMapper из библиотеки Jackson, который будет использоваться для (де)сериализации JSON – преобразования JSON-строк в Java-объекты и наоборот.
-```
+```java
 ObjectMapper mapper = new ObjectMapper();
 ```
 * Создаем объект класса `NasaAnswer`, с помощью `mapper` у которого есть метод `readValue` указываем откуда мы должны прочитать данные `response.getEntity().getContent()` и обязательно указываем к какому типу данных этот ответ сервера преобразовать `NasaAnswer.class`.
-```
+```java
 NasaAnswer answer = mapper.readValue(response.getEntity().getContent(), NasaAnswer.class);
 ```
 * Копируем ссылку в отдельную переменную.
-```
+```java
 String imageUrl = answer.url;
 ```
 * Для скачивания картинки делаем новые GET запрос.
-```
+```java
 HttpGet imageRequest = new HttpGet(imageUrl);
 ```
 * Создаем массив который методом `split` разбивает по слешу /.
-```
+```java
 String[] urlSplitted = imageUrl.split("/");
 ```
 * Дальше нужно обратиться к последнему элементу массива берем длинну массива -1 `[urlSplitted.length - 1]`.
-```
+```java
 String fileName = urlSplitted[urlSplitted.length - 1];
 ```
 * Посылаем запрос заставляя `httpclient` выполнить задание.
-```
+```java
 CloseableHttpResponse image = httpclient.execute(imageRequest);
 ```
 * Чтобы записать картинку ввиде файла используем стандартые средства которые встроены в Java, например `FileOutputStream` специальный класс который позволяет записывать бинарные данные в файл с указанием где будет распологаться картинка(для этого в проекте создадим папку `Image`).
-```
+```java
 FileOutputStream fos = new FileOutputStream("Image/" + fileName);
 ```
 * Обращаемся к `image` где хранится ответ от сервера, который включает в себя картинку, `.writeTo(fos)` записывайся сюда.
-```
+```java
 image.getEntity().writeTo(fos);
 ```
 **10. Запускаем программу, получаем картинку за указанную дату.**
